@@ -1,0 +1,72 @@
+ rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // ==============================
+    // MEDICINES
+    // ==============================
+    match /medicines/{medicineId} {
+
+      allow read: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid;
+
+      allow update: if isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid;
+
+      allow delete: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+    }
+
+    // ==============================
+    // FAMILY MEMBERS
+    // ==============================
+    match /familyMembers/{memberId} {
+
+      allow read: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid;
+
+      allow update: if isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid;
+
+      allow delete: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+    }
+
+    // ==============================
+    // EMERGENCY EVENTS
+    // ==============================
+    match /emergencyEvents/{eventId} {
+
+      // User can only see their own emergency events
+      allow read: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+
+      // User can only create an emergency event for themselves
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid;
+
+      // User can only update their own emergency events
+      // and cannot change the userId
+      allow update: if isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid;
+
+      // User can only delete their own emergency events
+      allow delete: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+    }
+  }
+}
